@@ -179,11 +179,6 @@ index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
 | sort - count
 ```
 
-[<img width="1178" height="765" alt="6. Top Hosts running PowerShell" src="https://github.com/user-attachments/assets/acffed9f-19de-4175-9860-33d5dcb8f5e1" />](https://github.com/tuh1n-bd/files/blob/main/6.%20Top%20Hosts%20running%20PowerShell.png)
-
-
-
-
 
 7. Rare PowerShell commands
    ----
