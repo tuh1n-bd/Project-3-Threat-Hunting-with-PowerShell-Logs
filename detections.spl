@@ -1,5 +1,4 @@
 ## Core Detection SPLs
-
 1. Encoded PowerShell (`-enc`)
 2. Suspicious Flags (`-nop`, `-w hidden`, `-noni`)
 3. Remote File Downloads (`Invoke-WebRequest`, `Net.WebClient`)
