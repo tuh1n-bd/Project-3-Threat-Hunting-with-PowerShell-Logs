@@ -125,7 +125,7 @@ index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*" earliest=-7d
 ```
 
 
-<img width="1178" height="707" alt="2  Timechart — PowerShell executions over time" src="https://github.com/user-attachments/assets/f0aa19cd-2805-4489-b9ef-b3c6c70915b8" />
+[<img width="1178" height="707" alt="2  Timechart — PowerShell executions over time" src="https://github.com/user-attachments/assets/f0aa19cd-2805-4489-b9ef-b3c6c70915b8" />](https://github.com/tuh1n-bd/files/blob/main/2.%20Timechart%20%E2%80%94%20PowerShell%20executions%20over%20time.png)
 
 ------
 
@@ -134,12 +134,13 @@ index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*" earliest=-7d
 
 ```
 index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
+| eval Account_Nmae="user***", Source_IP="1.2.3.x"
 | eval suspicious_flags=if(match(CommandLine,"-nop|-w hidden|-noni|-executionpolicy bypass"),1,0)
 | where suspicious_flags=1
 | table _time, Account_Name, ComputerName, CommandLine
 ```
 
-<img width="1184" height="922" alt="3 suspicious PowerShell flags" src="https://github.com/user-attachments/assets/c59a4a2a-50b5-42b2-8506-a39d04f149f2" />
+
 
 ---------------------------
 
@@ -153,7 +154,7 @@ index="sim1" sourcetype="mitre_logs" (EventID=4104 OR EventID=4688) CommandLine=
 | table _time, Account_Name, ComputerName, CommandLine, Source_IP
 ```
 
-<img width="1187" height="923" alt="4  Base64-encoded PS executions" src="https://github.com/user-attachments/assets/d6eb1860-309e-48f8-93ff-286179698be1" />
+[<img width="1187" height="923" alt="4  Base64-encoded PS executions" src="https://github.com/user-attachments/assets/d6eb1860-309e-48f8-93ff-286179698be1" />](https://github.com/tuh1n-bd/files/blob/main/4.%20base64-new.png)
 
 -----
 
@@ -165,24 +166,28 @@ index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
 | sort - count
 ```
 
-<img width="1178" height="765" alt="5  Top Accounts running PowerShell" src="https://github.com/user-attachments/assets/acffed9f-19de-4175-9860-33d5dcb8f5e1" />
+[<img width="1178" height="765" alt="5  Top Accounts running PowerShell" src="https://github.com/user-attachments/assets/acffed9f-19de-4175-9860-33d5dcb8f5e1" />](https://github.com/tuh1n-bd/files/blob/main/5.%20Top%20Accounts%20running%20PowerShell.png)
 
 
 
 6. Top Hosts running PowerShell
    -----
+   
 ```
 index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
 | stats count by ComputerName
 | sort - count
 ```
 
-<img width="1181" height="782" alt="6  Top Hosts running PowerShell" src="https://github.com/user-attachments/assets/039d0f28-b486-4891-866f-21a137256805" />
+[<img width="1178" height="765" alt="6. Top Hosts running PowerShell" src="https://github.com/user-attachments/assets/acffed9f-19de-4175-9860-33d5dcb8f5e1" />](https://github.com/tuh1n-bd/files/blob/main/6.%20Top%20Hosts%20running%20PowerShell.png)
 
---------------
+
+
+
 
 7. Rare PowerShell commands
-   -----
+   ----
+   
 ```
 index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 | rare CommandLine
@@ -190,7 +195,7 @@ index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 | head 20
 ```
 
-<img width="1186" height="914" alt="7  Rare PowerShell commands" src="https://github.com/user-attachments/assets/bb80f299-d0b7-4cae-ac91-9d6bb0b88bb3" />
+[<img width="1186" height="914" alt="7  Rare PowerShell commands" src="https://github.com/user-attachments/assets/bb80f299-d0b7-4cae-ac91-9d6bb0b88bb3" />](https://github.com/tuh1n-bd/files/blob/main/7.%20Rare%20PowerShell%20commands.png)
 
 ------
 
