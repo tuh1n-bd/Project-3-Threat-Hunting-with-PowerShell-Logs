@@ -1,4 +1,4 @@
-# Project-3-Threat-Hunting-with-PowerShell-Logs
+[threat_hunting_powershell_dashboard-2025-10-01.pdf](https://github.com/user-attachments/files/22641401/threat_hunting_powershell_dashboard-2025-10-01.pdf)[powershell_hunting.xml.txt](https://github.com/user-attachments/files/22641036/powershell_hunting.xml.txt)# Project-3-Threat-Hunting-with-PowerShell-Logs
 
 ## 1) Project Overview
 This project focuses on threat hunting with PowerShell logs in Splunk, simulating real-world attack patterns such as encoded commands, credential dumping (Mimikatz), and malicious downloads. The dataset (powershell_attack_dataset.csv) contains both benign and malicious PowerShell events, making it ideal for practicing detection engineering and SOC workflows.
@@ -13,17 +13,34 @@ Dashboards and alerts for SOC monitoring
 
 End-to-end walkthrough for Splunk Power User & SOC Analyst skill building
 
-## 2) Dataset Prep
+## 2) Dataset Prep & Ingestion
 
-You’ll need fields like:
+**Required fields (recommended):**
+- `timestamp` (or `_time` parsed)
+- `EventID` / `EventCode`
+- `Account_Name`
+- `ComputerName`
+- `Source_IP`
+- `ParentImage`
+- `ProcessName`
+- `CommandLine`
 
-EventCode or EventID (4104 = Script Block Logging, 4688 = Process Creation)
-CommandLine (actual PS command executed)
-Account_Name
-ComputerName
-_time
+**Ingest CSV into Splunk (UI steps):**
+1. Splunk Web → Settings → Add Data → Upload.  
+2. Select `powershell_attack_dataset.csv`.  
+3. Set **Source type** to `csv` (or create a custom `powershell_logs` sourcetype).  
+4. Set **Index** to `ps_data` (create index if needed).  
+5. Finish and verify ingestion:
+     
+   ```
+   index=ps_data sourcetype=csv | head 20
+   ```
+   
+Field extraction tip (if CommandLine not parsed):
 
-If not already extracted, create a field alias so CommandLine always exists.
+```
+| rex field=_raw "CommandLine=(?<CommandLine>\".*?\"|\S+)"
+```
 
 ## MITRE ATT&CK
 - T1059.001 — PowerShell Execution
@@ -199,8 +216,130 @@ index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 [<img width="1186" height="914" alt="7  Rare PowerShell commands" src="https://github.com/user-attachments/assets/bb80f299-d0b7-4cae-ac91-9d6bb0b88bb3" />](https://github.com/tuh1n-bd/files/blob/main/7.%20Rare%20PowerShell%20commands.png)
 
 ------
+## 5) 
 
-## 5) Alerts (Saved Searches)
+[Uploading powershell_hun<dashboard version="1.1" theme="dark">
+  <label>Threat Hunting: PowerShell Dashboard</label>
+  <row>
+    <panel>
+      <title>1. KPI — Total PowerShell executions (last 24h)</title>
+      <chart>
+        <search>
+          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*" earliest=-24h
+| stats count AS total_ps_exec</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">radialGauge</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>2. Timechart — PowerShell executions over time</title>
+      <chart>
+        <search>
+          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*" earliest=-7d
+| timechart span=1h count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>3. Suspicious flags detected</title>
+      <table>
+        <search>
+          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*"
+| eval suspicious_flags=if(match(CommandLine,"-nop|-w hidden|-noni|-executionpolicy bypass"),1,0)
+| where suspicious_flags=1
+| table _time, Account_Name, ComputerName, CommandLine</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>4. Base64-encoded PS executions</title>
+      <table>
+        <search>
+          <query>index="ps_data" sourcetype="csv" (EventID=4104 OR EventID=4688) CommandLine="*powershell*"
+| eval has_base64=if(match(CommandLine,"-enc|encode|frombase64string"),1,0)
+| where has_base64=1
+| table _time, Account_Name, ComputerName, CommandLine, Source_IP</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>5. Top Accounts running PowerShell</title>
+      <chart>
+        <search>
+          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*"
+| stats count by Account_Name
+| sort - count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>6. Top Hosts running PowerShell</title>
+      <chart>
+        <search>
+          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*"
+| stats count by ComputerName
+| sort - count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>7. Rare PowerShell commands</title>
+      <chart>
+        <search>
+          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*"
+| rare CommandLine
+| sort - count
+| head 20</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</dashboard>ting.xml.txt…]()
+
+----------------------------------------------
+
+
+
+## 6) Alerts (Saved Searches)
 
 1. Alert: Encoded PowerShell Command
 SPL A
@@ -214,30 +353,72 @@ Runs every 10m, severity = Medium
 SPL D
 High severity, immediate escalation
 
-## 6) SOC L1 Triage Playbook
+## 7) SOC L1 Triage Playbook (quick checklist)
 
-When an alert fires:
+When an alert fires (e.g., Encoded PS or Mimikatz):
 
-1. Check CommandLine: Does it include -enc, Invoke-WebRequest, Mimikatz?
+Acknowledge the alert in your ticketing tool.
 
-2. Check user account: Is it a service account, admin, or end-user?
+Identify scope: Account_Name, ComputerName, Source_IP, EventIDs.
 
-3. Check host: Is this a server, workstation, or domain controller?
+Examine the CommandLine: look for IEX, IWR, -enc, mimikatz.
 
-4. Pivot:
+Pivot: search other events for the same Account_Name / ComputerName within ±30 minutes.
 
--  Search index=ps_data sourcetype=csv by Account_Name or ComputerName to see what else happened.
+```
+index=ps_data sourcetype=csv (Account_Name="victim" OR ComputerName="HOST-WS1") earliest=-30m latest=+30m
+```
 
--  Look for EventID 4688 (process creation) to see child processes.
+Check parent/child processes: look for EventID 4688 event(s) and examine ParentImage/ProcessName.
 
-5. Correlate: Was this followed by credential dumping, lateral movement, or persistence?
+Enrich: IP reputation (threat_intel lookup), domain extraction from URLs.
 
-6. Contain if malicious: Disable account, isolate host.
+Contain & escalate: If confirmed malicious (mimikatz or remote payload execution) — isolate host, disable account, escalate to L2.
 
-7. Document: Add to case with screenshots and SPL used.
+Document: Timeline, IoCs (IPs, URLs, filenames), commands observed, recommended remediation.
+
+Close or follow-up: add remediation notes & add signature to playbook if false positive.
+
+## 8) Testing & verification steps (recommended)
+
+Upload powershell_attack_dataset.csv to Splunk (index=ps_data, sourcetype=csv).
+
+Verify ingestion:
+
+index=ps_data sourcetype=csv | head 20
 
 
--------------------------------------------
+Run Encoded detection SPL — you should see base64/enc items.
 
+Run Suspicious flags SPL — you should see flagged items.
 
+Run Mimikatz SPL — confirm the mimikatz rows appear.
 
+For alert testing, create a small powershell_attack_test.csv with ~20 rows focusing on malicious examples and ingest it. Run saved searches manually and confirm alerts trigger.
+
+Mask PII when capturing screenshots (see README notes below).
+
+## 9) Repo structure (recommended)
+PowerShell-ThreatHunting-Splunk/
+├─ README.md
+├─ detections.spl           # All SPLs consolidated (copy/paste ready)
+├─ savedsearches.conf.example
+├─ dashboard/
+│  ├─ powershell_hunting.xml
+│  └─ screenshots/
+├─ sample_data/
+│  ├─ powershell_attack_dataset.csv
+│  └─ powershell_attack_test.csv
+├─ playbook.md
+├─ TESTING.md
+└─ LICENSE
+
+## 10) Notes, tuning & next steps
+
+Performance: Avoid transaction at scale. Prefer stats / streamstats and narrow searches with index/sourcetype.
+
+Suppression & throttling: Use alert.suppress in saved searches to avoid noise.
+
+False positives: Add allowlists (trusted admin hosts / service accounts) as part of tuning.
+
+Next steps: Add threat intel lookup, automated enrichment, and a correlation search for "suspicious PS → lateral movement".
