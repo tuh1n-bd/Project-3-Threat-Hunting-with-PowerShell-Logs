@@ -1,1 +1,66 @@
+## Core Detection SPLs
 
+1. Encoded PowerShell (`-enc`)
+2. Suspicious Flags (`-nop`, `-w hidden`, `-noni`)
+3. Remote File Downloads (`Invoke-WebRequest`, `Net.WebClient`)
+4. Credential Dumping (`Mimikatz`)
+5. Rare Commands (threat hunting baseline)
+
+A) Detect Base64-encoded PowerShell (very common in attacks)
+   ---
+
+```
+index="ps_data" sourcetype="csv" (EventID=4104 OR EventID=4688) CommandLine="*powershell*"
+| eval has_base64=if(match(CommandLine,"-enc|encode|frombase64string"),1,0)
+| where has_base64=1
+| table _time, Account_Name, ComputerName, CommandLine, Source_IP
+```
+
+
+
+
+👉Detects obfuscation/encoded commands.
+-----------------
+B) Detect suspicious PowerShell flags
+----
+
+```
+index="ps_data" sourcetype="csv" CommandLine="*powershell*"
+| eval suspicious_flags=if(match(CommandLine,"-nop|-w hidden|-noni|-executionpolicy bypass"),1,0)
+| where suspicious_flags=1
+| table _time, Account_Name, ComputerName, CommandLine`
+```
+
+👉 Flags: -nop (no profile), -w hidden, -noni (no interaction).
+
+C) Detect PowerShell downloading remote files
+--
+
+```
+index="ps_data" sourcetype="csv" CommandLine="*powershell*"
+| where like(CommandLine,"%Invoke-WebRequest%") OR like(CommandLine,"%IWR%") OR like(CommandLine,"%Net.WebClient%")
+| table _time, Account_Name, ComputerName, Source_IP, CommandLine
+```
+
+👉 Common in malware initial access.
+
+D) Detect credential dumping tools (Mimikatz, Invoke-Mimikatz)
+--
+
+```
+index="ps_data" sourcetype="csv" CommandLine="*powershell*"
+| where like(CommandLine,"%mimikatz%") OR like(CommandLine,"%Invoke-Mimikatz%")
+| table _time, Account_Name, ComputerName, CommandLine
+```
+
+👉 Credential dumping from memory.
+
+E) Hunt all unusual PowerShell commands (baseline approach)
+--
+
+```
+index="ps_data" sourcetype="csv" CommandLine="*powershell*"
+| stats count by CommandLine
+| sort - count
+| head 20
+```
