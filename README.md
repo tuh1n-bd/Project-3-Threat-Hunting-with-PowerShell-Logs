@@ -41,7 +41,7 @@ If not already extracted, create a field alias so CommandLine always exists.
 A) Detect Base64-encoded PowerShell (very common in attacks)
 
 ```
-index="sim1" sourcetype="mitre_logs" (EventID=4104 OR EventID=4688) CommandLine="*powershell*"
+index="ps_data" sourcetype="csv" (EventID=4104 OR EventID=4688) CommandLine="*powershell*"
 | eval has_base64=if(match(CommandLine,"-enc|encode|frombase64string"),1,0)
 | where has_base64=1
 | table _time, Account_Name, ComputerName, CommandLine, Source_IP
@@ -56,7 +56,7 @@ B) Detect suspicious PowerShell flags
 
 
 ```
-index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
+index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 | eval suspicious_flags=if(match(CommandLine,"-nop|-w hidden|-noni|-executionpolicy bypass"),1,0)
 | where suspicious_flags=1
 | table _time, Account_Name, ComputerName, CommandLine`
@@ -67,7 +67,7 @@ index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
 C) Detect PowerShell downloading remote files
 
 ```
-index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
+index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 | where like(CommandLine,"%Invoke-WebRequest%") OR like(CommandLine,"%IWR%") OR like(CommandLine,"%Net.WebClient%")
 | table _time, Account_Name, ComputerName, Source_IP, CommandLine
 ```
@@ -77,7 +77,7 @@ index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
 D) Detect credential dumping tools (Mimikatz, Invoke-Mimikatz)
 
 ```
-index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
+index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 | where like(CommandLine,"%mimikatz%") OR like(CommandLine,"%Invoke-Mimikatz%")
 | table _time, Account_Name, ComputerName, CommandLine
 ```
@@ -87,7 +87,7 @@ index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
 E) Hunt all unusual PowerShell commands (baseline approach)
 
 ```
-index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
+index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 | stats count by CommandLine
 | sort - count
 | head 20
@@ -108,7 +108,7 @@ Build a Threat Hunting: PowerShell Dashboard with panels:
    ---
 
 ```
-index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*" earliest=-24h
+index="ps_data" sourcetype="csv" CommandLine="*powershell*" earliest=-24h
 | stats count AS total_ps_exec
 ```
 
@@ -120,7 +120,7 @@ index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*" earliest=-24h
    ---
 
 ```
-index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*" earliest=-7d
+index="ps_data" sourcetype="csv" CommandLine="*powershell*" earliest=-7d
 | timechart span=1h count
 ```
 
@@ -133,7 +133,7 @@ index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*" earliest=-7d
    ---
 
 ```
-index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
+index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 | eval Account_Nmae="user***", Source_IP="1.2.3.x"
 | eval suspicious_flags=if(match(CommandLine,"-nop|-w hidden|-noni|-executionpolicy bypass"),1,0)
 | where suspicious_flags=1
@@ -141,27 +141,28 @@ index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
 ```
 
 
+<img width="1187" height="924" alt="3  suspicious-new" src="https://github.com/user-attachments/assets/66f6a5ef-b31a-491e-95a3-f97112930378" />
 
----------------------------
 
 4. Base64-encoded PS executions
    -------
    
 ```
-index="sim1" sourcetype="mitre_logs" (EventID=4104 OR EventID=4688) CommandLine="*powershell*"
+index="ps_data" sourcetype="csv" (EventID=4104 OR EventID=4688) CommandLine="*powershell*"
+| eval Account_Nmae="user***", Source_IP="1.2.3.x"
 | eval has_base64=if(match(CommandLine,"-enc|encode|frombase64string"),1,0)
 | where has_base64=1
 | table _time, Account_Name, ComputerName, CommandLine, Source_IP
 ```
 
-[<img width="1187" height="923" alt="4  Base64-encoded PS executions" src="https://github.com/user-attachments/assets/d6eb1860-309e-48f8-93ff-286179698be1" />](https://github.com/tuh1n-bd/files/blob/main/4.%20base64-new.png)
+<img width="1189" height="923" alt="4  base64-new" src="https://github.com/user-attachments/assets/00485e8a-2a8c-40e8-a14d-b7e64f8d80c0" />
 
 -----
 
 5. Top Accounts running PowerShell
    --------
 ```
-index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
+index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 | stats count by Account_Name
 | sort - count
 ```
@@ -174,10 +175,15 @@ index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
    -----
    
 ```
-index="sim1" sourcetype="mitre_logs" CommandLine="*powershell*"
+index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 | stats count by ComputerName
 | sort - count
 ```
+
+
+<img width="1181" height="782" alt="6  Top Hosts running PowerShell" src="https://github.com/user-attachments/assets/0950bbcd-12c5-4b4f-ad7a-41579e1b0f72" />
+
+
 
 
 7. Rare PowerShell commands
