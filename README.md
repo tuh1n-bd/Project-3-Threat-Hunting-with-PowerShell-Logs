@@ -216,124 +216,17 @@ index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 [<img width="1186" height="914" alt="7  Rare PowerShell commands" src="https://github.com/user-attachments/assets/bb80f299-d0b7-4cae-ac91-9d6bb0b88bb3" />](https://github.com/tuh1n-bd/files/blob/main/7.%20Rare%20PowerShell%20commands.png)
 
 ------
-## 5) 
+## 5) powershell_hunting.xml
 
-[Uploading powershell_hun<dashboard version="1.1" theme="dark">
-  <label>Threat Hunting: PowerShell Dashboard</label>
-  <row>
-    <panel>
-      <title>1. KPI — Total PowerShell executions (last 24h)</title>
-      <chart>
-        <search>
-          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*" earliest=-24h
-| stats count AS total_ps_exec</query>
-          <earliest>$earliest$</earliest>
-          <latest>$latest$</latest>
-        </search>
-        <option name="charting.chart">radialGauge</option>
-      </chart>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <title>2. Timechart — PowerShell executions over time</title>
-      <chart>
-        <search>
-          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*" earliest=-7d
-| timechart span=1h count</query>
-          <earliest>$earliest$</earliest>
-          <latest>$latest$</latest>
-        </search>
-        <option name="charting.chart">column</option>
-        <option name="charting.drilldown">none</option>
-      </chart>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <title>3. Suspicious flags detected</title>
-      <table>
-        <search>
-          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*"
-| eval suspicious_flags=if(match(CommandLine,"-nop|-w hidden|-noni|-executionpolicy bypass"),1,0)
-| where suspicious_flags=1
-| table _time, Account_Name, ComputerName, CommandLine</query>
-          <earliest>$earliest$</earliest>
-          <latest>$latest$</latest>
-        </search>
-        <option name="drilldown">cell</option>
-      </table>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <title>4. Base64-encoded PS executions</title>
-      <table>
-        <search>
-          <query>index="ps_data" sourcetype="csv" (EventID=4104 OR EventID=4688) CommandLine="*powershell*"
-| eval has_base64=if(match(CommandLine,"-enc|encode|frombase64string"),1,0)
-| where has_base64=1
-| table _time, Account_Name, ComputerName, CommandLine, Source_IP</query>
-          <earliest>$earliest$</earliest>
-          <latest>$latest$</latest>
-        </search>
-        <option name="drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
-      </table>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <title>5. Top Accounts running PowerShell</title>
-      <chart>
-        <search>
-          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*"
-| stats count by Account_Name
-| sort - count</query>
-          <earliest>$earliest$</earliest>
-          <latest>$latest$</latest>
-        </search>
-        <option name="charting.chart">column</option>
-        <option name="charting.drilldown">none</option>
-      </chart>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <title>6. Top Hosts running PowerShell</title>
-      <chart>
-        <search>
-          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*"
-| stats count by ComputerName
-| sort - count</query>
-          <earliest>$earliest$</earliest>
-          <latest>$latest$</latest>
-        </search>
-        <option name="charting.chart">bar</option>
-        <option name="charting.chart.stackMode">default</option>
-        <option name="charting.drilldown">none</option>
-      </chart>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <title>7. Rare PowerShell commands</title>
-      <chart>
-        <search>
-          <query>index="ps_data" sourcetype="csv" CommandLine="*powershell*"
-| rare CommandLine
-| sort - count
-| head 20</query>
-          <earliest>$earliest$</earliest>
-          <latest>$latest$</latest>
-        </search>
-        <option name="charting.chart">area</option>
-        <option name="charting.drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
-      </chart>
-    </panel>
-  </row>
-</dashboard>ting.xml.txt…]()
+<img width="1145" height="925" alt="dashboard1" src="https://github.com/user-attachments/assets/f0a69be9-3c2e-43e3-830e-b738aadca2b5" />
+
+<img width="1142" height="750" alt="dashboard2" src="https://github.com/user-attachments/assets/b8f0a7d6-d8b3-4ba0-a195-d5289a61b40c" />
+
+<img width="1143" height="773" alt="dashboard3" src="https://github.com/user-attachments/assets/893c77e1-7ce9-4a45-915d-b541a292d1e8" />
+
+<img width="1144" height="908" alt="dashboard4" src="https://github.com/user-attachments/assets/5895fd03-749f-49c4-b91e-b3681f32ce19" />
+
+
 
 ----------------------------------------------
 
@@ -398,7 +291,7 @@ For alert testing, create a small powershell_attack_test.csv with ~20 rows focus
 
 Mask PII when capturing screenshots (see README notes below).
 
-## 9) Repo structure (recommended)
+## 9) Repo structure 
 PowerShell-ThreatHunting-Splunk/
 ├─ README.md
 ├─ detections.spl           # All SPLs consolidated (copy/paste ready)
