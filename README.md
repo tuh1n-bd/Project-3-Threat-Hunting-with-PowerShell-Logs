@@ -1,4 +1,4 @@
-[threat_hunting_powershell_dashboard-2025-10-01.pdf](https://github.com/user-attachments/files/22641401/threat_hunting_powershell_dashboard-2025-10-01.pdf)[powershell_hunting.xml.txt](https://github.com/user-attachments/files/22641036/powershell_hunting.xml.txt)# Project-3-Threat-Hunting-with-PowerShell-Logs
+# Project-3-Threat-Hunting-with-PowerShell-Logs
 
 ## 1) Project Overview
 This project focuses on threat hunting with PowerShell logs in Splunk, simulating real-world attack patterns such as encoded commands, credential dumping (Mimikatz), and malicious downloads. The dataset (powershell_attack_dataset.csv) contains both benign and malicious PowerShell events, making it ideal for practicing detection engineering and SOC workflows.
