@@ -216,7 +216,7 @@ index="ps_data" sourcetype="csv" CommandLine="*powershell*"
 [<img width="1186" height="914" alt="7  Rare PowerShell commands" src="https://github.com/user-attachments/assets/bb80f299-d0b7-4cae-ac91-9d6bb0b88bb3" />](https://github.com/tuh1n-bd/files/blob/main/7.%20Rare%20PowerShell%20commands.png)
 
 ------
-## 5) powershell_hunting.xml
+## 5) Dashboard powershell_hunting.xml
 
 <img width="1145" height="925" alt="dashboard1" src="https://github.com/user-attachments/assets/f0a69be9-3c2e-43e3-830e-b738aadca2b5" />
 
@@ -294,7 +294,7 @@ Mask PII when capturing screenshots (see README notes below).
 ## 9) Repo structure 
 PowerShell-ThreatHunting-Splunk/
 ├─ README.md
-├─ detections.spl           # All SPLs consolidated (copy/paste ready)
+├─ detections.spl           
 ├─ savedsearches.conf.example
 ├─ dashboard/
 │  ├─ powershell_hunting.xml
