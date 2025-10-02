@@ -1,1 +1,42 @@
+[Encoded_PowerShell_Command]
+action.email = 1
+action.email.to = soc-team@example.com
+alert.severity = 2
+cron_schedule = */5 * * * *
+dispatch.earliest_time = -10m
+dispatch.latest_time = now
+description = Detect base64/encoded or obvious obfuscated PowerShell commands (EncodedCommand, -enc, convertfrom-base64string).
+is_scheduled = 1
+
+search = index=ps_data sourcetype=csv CommandLine="*powershell*" | eval cmd_lower=lower(CommandLine) | where match(cmd_lower,"(-enc|encodedcommand|convertfrom-base64string|frombase64string|encodedcommand=)") | stats count AS hits by Account_Name, ComputerName, Source_IP, CommandLine | where hits >= 1
+alert.suppress = 1
+alert.suppress.period = 30m
+
+[PowerShell_Suspicious_Flags]
+action.email = 1
+action.email.to = soc-team@example.com
+alert.severity = 3
+cron_schedule = */10 * * * *
+dispatch.earliest_time = -15m
+dispatch.latest_time = now
+description = Detect PowerShell runs with suspicious invocation flags (-nop, -noni, -noninteractive, -ExecutionPolicy Bypass).
+is_scheduled = 1
+
+search = index=ps_data sourcetype=csv CommandLine="*powershell*" | eval cmd_lower=lower(CommandLine) | where match(cmd_lower,"(-nop|-noni|-noninteractive|-windowstyle hidden|-w hidden|-executionpolicy bypass|-ep bypass)") | stats count AS hits by Account_Name, ComputerName, Source_IP, CommandLine | where hits >= 1
+alert.suppress = 1
+alert.suppress.period = 30m
+
+[Credential_Dumping_Mimikatz]
+action.email = 1
+action.email.to = soc-team@example.com
+alert.severity = 1
+cron_schedule = */1 * * * *
+dispatch.earliest_time = -5m
+dispatch.latest_time = now
+description = Immediate high priority alert when mimikatz or known credential dumping commands are observed in PowerShell logs.
+is_scheduled = 1
+
+search = index=ps_data sourcetype=csv | where match(lower(CommandLine),"mimikatz|invoke-mimikatz|sekurlsa|dumpcreds") | stats count AS hits by Account_Name, ComputerName, Source_IP, CommandLine | where hits >= 1
+alert.suppress = 1
+alert.suppress.period = 60m
 
