@@ -1,23 +1,21 @@
-##SOC triage playbook (what an L1 should do when alert fires)
+## SOC L1 Triage Playbook
 
-When BF_SuccessAfterFailures alert fires:
+When an alert fires:
+---
+Check CommandLine: Does it include -enc, Invoke-WebRequest, Mimikatz?
 
-1. Acknowledge alert in ticketing system.
+Check user account: Is it a service account, admin, or end-user?
 
-2. Identify scope: Which Account_Name, Source_IP, Host? (use event fields)
+Check host: Is this a server, workstation, or domain controller?
 
-3. Check for success after failures: Confirm EventID 4624 after many 4625s.
+Pivot:
 
-4. Lookup IP reputation: query threat_intel lookup or run enrichment.
+Search index=ps_data sourcetype=csv by Account_Name or ComputerName to see what else happened.
 
-5. Check location/time: iplocation Source_IP and check if login times conflict with user’s usual activity.
+Look for EventID 4688 (process creation) to see child processes.
 
-6. Look for lateral movement: search for unusual process creations (4688) from the host.
+Correlate: Was this followed by credential dumping, lateral movement, or persistence?
 
-7. Verify MFA status / password reset: communicate with identity team — recommend password reset & MFA enforcement if suspicious.
+Contain if malicious: Disable account, isolate host.
 
-8. Containment if confirmed: disable account, isolate host, escalate to L2.
-
-9. Document findings: in ticket: timeline, query used, IOC list (Source_IPs), recommended remediation.
-
-10. Add suppression rule if false positives repeat
+Document: Add to case with screenshots and SPL used.
